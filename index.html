@@ -1,57 +1,115 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>London & New York Weather & TFL Northern Line</title>
-    <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Northern Line Status & Weather</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f0f0f0; margin: 0; }
+  header { background: #333; padding: 1em; }
+  nav ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; }
+  nav a { color: #fff; text-decoration: none; }
+  main { max-width: 800px; margin: 0 auto; padding: 1.5em; }
+  section { background: #fff; padding: 1em 1.5em; margin-bottom: 20px; box-shadow: 0 0 10px rgba(0,0,0,.1); border-radius: 6px; }
+  h1 { color: #333; margin-top: 0; font-size: 1.5em; }
+  p { color: #444; }
+  .badge { display: inline-block; padding: 6px 14px; border-radius: 4px; color: #fff; font-weight: bold; background: #888; }
+  .good { background: #1e8e3e; }
+  .minor { background: #e8a200; }
+  .severe { background: #c5221f; }
+  .temp { font-size: 2.2em; font-weight: bold; color: #333; margin: 0.2em 0; }
+  .btn { display: inline-block; background: #333; color: #fff; padding: 10px 18px; text-decoration: none; border-radius: 4px; margin: 6px 8px 6px 0; }
+  .btn:hover { background: #555; }
+  .updated { font-size: 0.85em; color: #777; }
+  footer { background: #333; color: #fff; padding: 1em; text-align: center; }
+</style>
 </head>
 <body>
-    <header>
-        <nav>
-            <ul>
-                <li><a href="#tfl-northern-line">TFL Northern Line</a></li>
-                <li><a href="#weather-london">Weather in London</a></li>
-                <li><a href="#weather-new-york">Weather in New York</a></li>
-            </ul>
-        </nav>
-    </header>
-    <main>
-        <section id="tfl-northern-line">
-            <h1>TFL Northern Line</h1>
-            <p>The Northern Line is one of the busiest lines on the London Underground, running north to south through the city with several branches.</p>
-            <ul>
-                <li>Key stations: King's Cross St Pancras, Euston, Bank, London Bridge</li>
-                <li>Branches: Edgware, High Barnet, Mill Hill East, Charing Cross and Bank</li>
-                <li>Frequency: Trains run every few minutes during peak hours</li>
-            </ul>
-            <button id="btn-tfl">Open in Google Maps</button>
-        </section>
-        <section id="weather-london">
-            <h1>Weather in London</h1>
-            <p>Check the latest forecast for London.</p>
-            <button id="btn-london">Open in Google Maps</button>
-        </section>
-        <section id="weather-new-york">
-            <h1>Weather in New York</h1>
-            <p>Check the latest forecast for New York.</p>
-            <button id="btn-ny">Open in Google Maps</button>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2026 moonsingh2024ps</p>
-    </footer>
-    <script>
-        const links = {
-            'btn-tfl': "https://www.google.com/maps/search/?api=1&query=King%27s+Cross+St+Pancras,+London",
-            'btn-london': "https://www.google.com/maps/search/?api=1&query=London,+UK",
-            'btn-ny': "https://www.google.com/maps/search/?api=1&query=New+York,+NY"
-        };
-        for (const id in links) {
-            document.getElementById(id).addEventListener('click', () => {
-                window.open(links[id], '_blank');
-            });
-        }
-    </script>
+<header>
+  <nav>
+    <ul>
+      <li><a href="#tfl-northern-line">Northern Line</a></li>
+      <li><a href="#weather-london">London Weather</a></li>
+      <li><a href="#weather-new-york">New York Weather</a></li>
+    </ul>
+  </nav>
+</header>
+<main>
+  <section id="tfl-northern-line">
+    <h1>TfL Northern Line Status</h1>
+    <div id="tfl-status"><span class="badge">Loading...</span></div>
+    <p id="tfl-reason"></p>
+    <p class="updated" id="tfl-updated"></p>
+    <a class="btn" href="https://tfl.gov.uk/tube-dlr-overground/status/" target="_blank" rel="noopener">Full status on TfL</a>
+    <a class="btn" href="https://www.google.com/maps/search/?api=1&query=King%27s+Cross+St+Pancras,+London" target="_blank" rel="noopener">Open in Google Maps</a>
+  </section>
+
+  <section id="weather-london">
+    <h1>Weather in London</h1>
+    <div id="wx-london">Loading...</div>
+    <a class="btn" href="https://www.bbc.co.uk/weather/2643743" target="_blank" rel="noopener">View on BBC Weather</a>
+    <a class="btn" href="https://www.google.com/maps/search/?api=1&query=London,+UK" target="_blank" rel="noopener">Open in Google Maps</a>
+  </section>
+
+  <section id="weather-new-york">
+    <h1>Weather in New York</h1>
+    <div id="wx-newyork">Loading...</div>
+    <a class="btn" href="https://www.bbc.co.uk/weather/5128581" target="_blank" rel="noopener">View on BBC Weather</a>
+    <a class="btn" href="https://www.google.com/maps/search/?api=1&query=New+York,+NY" target="_blank" rel="noopener">Open in Google Maps</a>
+  </section>
+</main>
+<footer><p>&copy; 2026 moonsingh2024ps</p></footer>
+
+<script>
+  // ---- TfL Northern Line status ----
+  async function loadTfl() {
+    const statusEl = document.getElementById('tfl-status');
+    try {
+      const res = await fetch('https://api.tfl.gov.uk/Line/northern/Status');
+      const data = await res.json();
+      const s = data[0].lineStatuses[0];
+      const desc = s.statusSeverityDescription;
+      let cls = 'severe';
+      if (desc === 'Good Service') cls = 'good';
+      else if (desc === 'Minor Delays') cls = 'minor';
+      statusEl.innerHTML = '<span class="badge ' + cls + '">' + desc + '</span>';
+      document.getElementById('tfl-reason').textContent = s.reason || 'No disruption reported.';
+      document.getElementById('tfl-updated').textContent = 'Checked at ' + new Date().toLocaleTimeString();
+    } catch (e) {
+      statusEl.innerHTML = '<span class="badge">Status unavailable</span>';
+      document.getElementById('tfl-reason').textContent = 'Please use the TfL link below.';
+    }
+  }
+
+  // ---- Weather (Open-Meteo) ----
+  const codes = {
+    0: 'Clear sky', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
+    45: 'Fog', 48: 'Fog', 51: 'Light drizzle', 53: 'Drizzle', 55: 'Heavy drizzle',
+    61: 'Light rain', 63: 'Rain', 65: 'Heavy rain', 71: 'Light snow', 73: 'Snow', 75: 'Heavy snow',
+    80: 'Rain showers', 81: 'Rain showers', 82: 'Heavy showers', 95: 'Thunderstorm', 96: 'Thunderstorm', 99: 'Thunderstorm'
+  };
+  async function loadWeather(elId, lat, lon) {
+    const el = document.getElementById(elId);
+    try {
+      const url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon +
+        '&current=temperature_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=auto';
+      const res = await fetch(url);
+      const d = await res.json();
+      const c = d.current;
+      el.innerHTML =
+        '<div class="temp">' + Math.round(c.temperature_2m) + '&deg;C</div>' +
+        '<p>' + (codes[c.weather_code] || 'Conditions unavailable') + ' &middot; Wind ' + Math.round(c.wind_speed_10m) + ' km/h</p>' +
+        '<p>Today: high ' + Math.round(d.daily.temperature_2m_max[0]) + '&deg;C, low ' + Math.round(d.daily.temperature_2m_min[0]) + '&deg;C</p>' +
+        '<p class="updated">Data from Open-Meteo, checked at ' + new Date().toLocaleTimeString() + '</p>';
+    } catch (e) {
+      el.textContent = 'Weather unavailable right now. Please use the BBC Weather link below.';
+    }
+  }
+
+  loadTfl();
+  loadWeather('wx-london', 51.5072, -0.1276);
+  loadWeather('wx-newyork', 40.7128, -74.0060);
+  setInterval(loadTfl, 300000); // refresh TfL every 5 minutes
+</script>
 </body>
 </html>
