@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>London & New York Weather & TFL Northern Line</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="#tfl-northern-line">TFL Northern Line</a></li>
+                <li><a href="#weather-london">Weather in London</a></li>
+                <li><a href="#weather-new-york">Weather in New York</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section id="tfl-northern-line">
+            <h1>TFL Northern Line</h1>
+            <p>The Northern Line is one of the busiest lines on the London Underground, running north to south through the city with several branches.</p>
+            <ul>
+                <li>Key stations: King's Cross St Pancras, Euston, Bank, London Bridge</li>
+                <li>Branches: Edgware, High Barnet, Mill Hill East, Charing Cross and Bank</li>
+                <li>Frequency: Trains run every few minutes during peak hours</li>
+            </ul>
+            <button id="btn-tfl">Open in Google Maps</button>
+        </section>
+        <section id="weather-london">
+            <h1>Weather in London</h1>
+            <p>Check the latest forecast for London.</p>
+            <button id="btn-london">Open in Google Maps</button>
+        </section>
+        <section id="weather-new-york">
+            <h1>Weather in New York</h1>
+            <p>Check the latest forecast for New York.</p>
+            <button id="btn-ny">Open in Google Maps</button>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2026 moonsingh2024ps</p>
+    </footer>
+    <script>
+        const links = {
+            'btn-tfl': "https://www.google.com/maps/search/?api=1&query=King%27s+Cross+St+Pancras,+London",
+            'btn-london': "https://www.google.com/maps/search/?api=1&query=London,+UK",
+            'btn-ny': "https://www.google.com/maps/search/?api=1&query=New+York,+NY"
+        };
+        for (const id in links) {
+            document.getElementById(id).addEventListener('click', () => {
+                window.open(links[id], '_blank');
+            });
+        }
+    </script>
+</body>
+</html>
